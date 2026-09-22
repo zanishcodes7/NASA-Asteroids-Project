@@ -6,6 +6,9 @@ and presented through an interactive Flask dashboard.
 
 ## Live Demo
 
+
+https://github.com/user-attachments/assets/c05151e1-f62c-43cf-8a55-44d1ccb6305d
+
 <img width="1350" height="640" alt="image" src="https://github.com/user-attachments/assets/220fb0b0-4f92-41db-9db2-323bc42de9b6" />
 <img width="1341" height="630" alt="image" src="https://github.com/user-attachments/assets/700f4989-989a-4da6-8cc1-b540af4b0516" />
 
