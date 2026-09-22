@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA Asteroid Watch </title>
+    <script src= "https://cdn.jsdelivr.net/npm/chart.js"></script>
+     <style>
+    body {
+        background: radial-gradient(circle at top, #0d1b2a, #000000);
+        color: #e0e6ed;
+        font-family: 'Segoe UI', sans-serif;
+        margin: 0;
+        padding: 40px 40px 80px 40px;
+    }
+    h1 {
+        text-align: center;
+        color: #4fc3f7;
+        text-shadow: 0 0 15px rgba(79,195,247,0.6);
+        letter-spacing: 2px;
+        margin-bottom: 10px;
+    }
+    .subtitle {
+        text-align: center;
+        color: #8899a6;
+        margin-bottom: 60px;
+    }
+    .cards {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 80px;
+    }
+    .card {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(79,195,247,0.3);
+        border-radius: 12px;
+        padding: 25px 35px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(79,195,247,0.15);
+        min-width: 180px;
+    }
+    .card .value {
+        font-size: 2.2em;
+        font-weight: bold;
+        color: #4fc3f7;
+    }
+    .card .label {
+        color: #8899a6;
+        margin-top: 8px;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .significant { color: #66bb6a !important; }
+    .not-significant { color: #ffa726 !important; }
+
+    .section-title {
+        text-align: center;
+        color: #8899a6;
+        font-weight: normal;
+        font-size: 1.3em;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+    }
+
+    .chart-container {
+        max-width: 700px;
+        height: 350px;
+        margin: 0 auto 100px auto;
+        background: rgba(255,255,255,0.03);
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .table-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding-top: 20px;
+        border-top: 1px solid rgba(79,195,247,0.15);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 10px 14px;
+        text-align: left;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    th {
+        color: #4fc3f7;
+        text-transform: uppercase;
+        font-size: 0.85em;
+    }
+    tr:hover { background: rgba(79,195,247,0.05); }
+    .hazard-tag {
+        background: rgba(239,83,80,0.2);
+        color: #ef5350;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.8em;
+    }
+    .safe-tag {
+        background: rgba(102,187,106,0.2);
+        color: #66bb6a;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.8em;
+    }
+</style>
+       
+</head>
+<body>
+    <!-- HTML Code for this -->
+
+
+
+    <h1>NASA ASTEROID WATCH </h1>
+    <p class = "subtitle">Analyzing Near Earth-Objects : Are hazardous Asteroids are really bigger?   </p>
+    <div class=" cards">
+        <div class = "card">
+            <div class ="value">{{data.total_count}}</div>
+            <div class="label">Total Asteroids Count </div>
+
+        </div>
+        <div class = "card">
+            <div class = "value">{{data.hazardous_count}}</div>
+            <div class = "label">Potentially Hazardous</div>
+        </div>
+        <div class = "card">
+            <div class = "value"> {{data.hazardous_avg}}</div>
+            
+            <div class = "label"> Average Hazardous size</div>
+    </div>
+    <div class = "card">
+            <div class = "value"> {{data.not_hazardous_avg}}</div>
+            
+            <div class = "label"> Average Not_Hazardous size</div>
+    </div>
+
+    <div class = "card">
+            <div class = "value"> {{'significant' if data.significant else'not significant'}}
+                p= {{data.p_value}}
+            </div>
+            
+            <div class = "label"> {{'Statistically significant' if data.significant else 'Not Significant'}}
+
+            </div>
+    </div>
+    </div>
+ <h2 class="section-title">Size Comparison</h2>
+    <div class= "Chart-container">
+        <canvas id = "sizechart"></canvas>
+    </div>
+    <h2 class="section-title">All Tracked Asteroids</h2>
+    <div class=" table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Avg Diameter (m) </th>
+                <th>Miss distance (km)</th>
+                <th>Status</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {%for a in data.asteroids%}
+        <tr>
+            <td>{{a.name}}</td>
+            <td>{{a.date}}</td>
+            <td>{{"%.1f"| format (a.avg_diameter )}}</td>
+            <td>{{"{:,.0f}".format(a.miss_distance_km)}}</td> 
+            <td>
+                {%if a.is_hazardous%}
+                <span class = "hazardous-tag">Hazardous</span>
+                {%else%}
+                <span class= "safe-tag">Safe </span>
+                {%endif%}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+    <!--Java script code for the dynamic chart displaying-->
+    <script>
+         const ctx = document.getElementById('sizechart').getContext("2d");
+         new Chart (ctx, {
+            type : "bar",
+            data:{
+                labels: ['Hazardous', 'Non-hazardous'],
+                datasets :[{
+                    label: 'Average_diameter(meters)',
+                    data: [334.2, 174.9],
+                     backgroundColor: ['rgba(239,83,80,0.7)', 'rgba(102,187,106,0.7)'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                plugins: {legend: {display:false}},
+                scales: {
+                    y: {
+                        ticks: { color: '#8899a6' },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    x:{
+                        ticks: { color: '#e0e6ed' },
+                        grid: { display: false }
+                    }
+                }
+            }
+         });
+     </script>
+    
+    
+</body>
+</html>
